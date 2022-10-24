@@ -157,6 +157,9 @@ namespace mekf{
             // DVL measurements
             vec3 dvl_vel, dvl_vel_NED;
 
+            // counter (dead reckoning)
+            int counter = 0;
+
     };
 
 }

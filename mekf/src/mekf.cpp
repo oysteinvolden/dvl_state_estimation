@@ -369,6 +369,15 @@ namespace mekf{
 
 
         sbg_ready_ = false; // dead reckoning
+
+        
+        // count IMU iteration
+        counter++;
+
+        // simulate camera dropout
+        //if(counter >= 4750){
+        //    cam_pose_ready_ = false; // dead reckoning
+        //}
        
  
         // %%% extract camera pos/yaw measurements %%%
@@ -470,7 +479,8 @@ namespace mekf{
         // INS propagation: x_ins[k+1]
         
         // if landmarks availalble
-        if(d_cam <= 20 && cam_pose_ready_){     
+        if(d_cam <= 20 && cam_pose_ready_){  
+        //if(counter < 4750){ // camera dropout      
             vec3 a_ins = R * f_ins + g_n;                                                          // linear acceleration
             p_ins = p_ins + h * v_ins + pow(h,2)/2 * a_ins;                                        // exact discretization
             //p_ins = p_ins + h * v_ins;                                                           // exact discretization
