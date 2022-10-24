@@ -1,4 +1,4 @@
-# dvl_state_estimation
+# Visual-acoustic state estimation
 Fusion of camera-tag pose, DVL velocity, and IMU data using the multiplicative extended Kalman filter (MEKF).
 
 ## Overview
