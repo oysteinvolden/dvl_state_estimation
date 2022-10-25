@@ -374,11 +374,7 @@ namespace mekf{
         // count IMU iteration
         counter++;
 
-        // simulate camera dropout
-        //if(counter >= 4750){
-        //    cam_pose_ready_ = false; // dead reckoning
-        //}
-       
+     
  
         // %%% extract camera pos/yaw measurements %%%
         if(cam_pose_ready_){
@@ -413,10 +409,39 @@ namespace mekf{
         dvl_vel_NED = R * dvl_vel;
 
 
+        // case 1: dropout due to noisy/nonexistent measurements
         // acceptance critera (the second critera (n>=8 point correspondences) is handled in the AprilTag node)
         if(d_cam > 20 && cam_pose_ready_){       
             cam_pose_ready_ = false;
         }
+
+
+
+        // reset covariance when camera measurements are "healthy"
+        if(d_cam <= 20 && cam_pose_ready_){
+
+            cam_accept_count++;
+
+            // reset covariance matrix only once below treshold
+            if(cam_accept_count == 1){
+
+                // reset covariance matrix        
+                P_prd.diagonal() << 0.000016, 0.000016, 0.000016, // delta pos in NED [m] 
+                            0.000016, 0.000016, 0.000016, // delta velocity in NED [m/s]
+                            0.000003,   0.000003,   0.000003, // delta acceleration bias [m/s^2]  
+                            0.00000005,  0.00000005,  0.00000005, // delta a 
+                            0.00000025, 0.00000025, 0.00000025; // delta gyro bias [rad]
+                
+                P_prd = 0.001 * P_prd;     
+            }
+        }
+
+        // case 2: simulated camera dropout
+        if(counter >= 4750){
+            cam_pose_ready_ = false; // dead reckoning
+        }
+
+
 
             
         // cam not available (no aiding - assume GNSS never available)     
@@ -479,8 +504,8 @@ namespace mekf{
         // INS propagation: x_ins[k+1]
         
         // if landmarks availalble
-        if(d_cam <= 20 && cam_pose_ready_){  
-        //if(counter < 4750){ // camera dropout      
+        //if(d_cam <= 20 && cam_pose_ready_){  
+        if(counter > 2121 && counter < 4750){ // case 1: when counter < 2121, case 2: when counter > 4750     
             vec3 a_ins = R * f_ins + g_n;                                                          // linear acceleration
             p_ins = p_ins + h * v_ins + pow(h,2)/2 * a_ins;                                        // exact discretization
             //p_ins = p_ins + h * v_ins;                                                           // exact discretization

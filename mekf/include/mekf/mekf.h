@@ -157,8 +157,11 @@ namespace mekf{
             // DVL measurements
             vec3 dvl_vel, dvl_vel_NED;
 
-            // counter (dead reckoning)
+            // IMU counter 
             int counter = 0;
+
+            // count the number of accepted camera measurements
+            cam_accept_count = 0;
 
     };
 
